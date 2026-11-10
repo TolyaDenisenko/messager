@@ -1,0 +1,5 @@
+add_executable(lm_selftest selftest.cpp)
+target_link_libraries(lm_selftest PRIVATE lm_sendercore)
+if(MINGW)
+    target_link_options(lm_selftest PRIVATE -static-libgcc -static-libstdc++)
+endif()

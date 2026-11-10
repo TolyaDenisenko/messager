@@ -1,0 +1,10 @@
+bin/
+obj/
+publish/
+*.user
+.vs/
+dist/
+installer/wix314/
+CMakeLists.txt.user*
+build/
+build-*/

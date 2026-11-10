@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WiX Toolset 3.x. Переменные передаются из build-msi.ps1: SharedKey, PayloadDir, AgentExe -->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:fire="http://schemas.microsoft.com/wix/FirewallExtension">
+  <Product Id="*" Name="LAN Messenger Agent" Language="1033" Version="1.0.0.0"
+           Manufacturer="LanMessenger" UpgradeCode="{7B1D3C52-4E7A-4B7E-9C21-5A6F0E8D2A11}">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" Platform="x64" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of LAN Messenger Agent is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Общий ключ подписи. Можно переопределить: msiexec /i ... SHAREDKEY=... (или через MST) -->
+    <Property Id="SHAREDKEY" Value="$(var.SharedKey)" Secure="yes" Hidden="yes" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="LAN Messenger Agent" />
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <!-- Служба: фон, автозапуск, LocalSystem; порт 5600 открывается в брандмауэре -->
+      <Component Id="AgentService" Guid="*">
+        <File Id="AgentExe" Source="$(var.AgentExe)" KeyPath="yes" />
+        <ServiceInstall Id="AgentSvc" Name="LanMessengerAgent" DisplayName="LAN Messenger Agent"
+                        Description="Приём сообщений от администратора по локальной сети"
+                        Type="ownProcess" Start="auto" ErrorControl="normal" Account="LocalSystem" />
+        <ServiceControl Id="AgentSvcCtl" Name="LanMessengerAgent" Start="install" Stop="both" Remove="uninstall" Wait="yes" />
+        <fire:FirewallException Id="AgentFw" Name="LAN Messenger Agent (TCP 5600)" Port="5600"
+                                Protocol="tcp" Scope="any" Profile="all" IgnoreFailure="yes" />
+      </Component>
+
+      <!-- Ключ и автозапуск UI-хелпера при входе любого пользователя -->
+      <Component Id="AgentRegistry" Guid="*">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\LanMessenger" Name="SharedKey" Type="string" Value="[SHAREDKEY]" KeyPath="yes" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run" Name="LanMessengerUI"
+                       Type="string" Value="&quot;[INSTALLFOLDER]LanMessengerUI.exe&quot;" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="Main" Title="LAN Messenger Agent" Level="1">
+      <ComponentRef Id="AgentService" />
+      <ComponentRef Id="AgentRegistry" />
+      <ComponentGroupRef Id="QtFiles" />
+    </Feature>
+  </Product>
+</Wix>

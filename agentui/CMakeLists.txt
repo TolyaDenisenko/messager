@@ -1,0 +1,5 @@
+add_executable(LanMessengerUI WIN32 main.cpp)
+target_link_libraries(LanMessengerUI PRIVATE lm_common Qt6::Widgets)
+if(MINGW)
+    target_link_options(LanMessengerUI PRIVATE -static-libgcc -static-libstdc++)
+endif()
