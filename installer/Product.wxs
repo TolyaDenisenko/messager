@@ -22,7 +22,7 @@
       <Component Id="AgentService" Guid="*">
         <File Id="AgentExe" Source="$(var.AgentExe)" KeyPath="yes" />
         <ServiceInstall Id="AgentSvc" Name="LanMessengerAgent" DisplayName="LAN Messenger Agent"
-                        Description="Приём сообщений от администратора по локальной сети"
+                        Description="Receives messages from the administrator over the local network"
                         Type="ownProcess" Start="auto" ErrorControl="normal" Account="LocalSystem" />
         <ServiceControl Id="AgentSvcCtl" Name="LanMessengerAgent" Start="install" Stop="both" Remove="uninstall" Wait="yes" />
         <fire:FirewallException Id="AgentFw" Name="LAN Messenger Agent (TCP 5600)" Port="5600"
